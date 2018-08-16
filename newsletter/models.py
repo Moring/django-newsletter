@@ -7,13 +7,14 @@ from django.contrib.sites.models import Site
 from django.contrib.sites.managers import CurrentSiteManager
 from django.core.mail import EmailMultiAlternatives
 from django.db import models
-from django.db.models import permalink
+#from django.db.models import permalink
 from django.template.loader import select_template
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.utils.timezone import now
+from django.urls import reverse
 
 from sorl.thumbnail import ImageField
 from distutils.version import LooseVersion
@@ -105,40 +106,20 @@ class Newsletter(models.Model):
         verbose_name = _('newsletter')
         verbose_name_plural = _('newsletters')
 
-    @permalink
     def get_absolute_url(self):
-        return (
-            'newsletter_detail', (),
-            {'newsletter_slug': self.slug}
-        )
+        return reverse( 'app_name_newsletter_detail', args={'newsletter_slug': self.slug} )
 
-    @permalink
     def subscribe_url(self):
-        return (
-            'newsletter_subscribe_request', (),
-            {'newsletter_slug': self.slug}
-        )
+        return reverse( 'app_name_newsletter_subscribe_request', args={'newsletter_slug': self.slug} )
 
-    @permalink
     def unsubscribe_url(self):
-        return (
-            'newsletter_unsubscribe_request', (),
-            {'newsletter_slug': self.slug}
-        )
+        return reverse( 'app_name_newsletter_unsubscribe_request', args={'newsletter_slug': self.slug} )
 
-    @permalink
     def update_url(self):
-        return (
-            'newsletter_update_request', (),
-            {'newsletter_slug': self.slug}
-        )
+        return reverse( 'app_name_newsletter_update_request', args={'newsletter_slug': self.slug} )
 
-    @permalink
     def archive_url(self):
-        return (
-            'newsletter_archive', (),
-            {'newsletter_slug': self.slug}
-        )
+        return reverse( 'app_name_newsletter_archive', args={'newsletter_slug': self.slug} )
 
     def get_sender(self):
         return get_address(self.sender, self.email)
@@ -390,28 +371,23 @@ class Subscription(models.Model):
             }
         )
 
-    @permalink
     def subscribe_activate_url(self):
-        return ('newsletter_update_activate', (), {
-            'newsletter_slug': self.newsletter.slug,
+        return reverse( 'app_name_newsletter_update_activate', args={'newsletter_slug': self.newsletter.slug,
             'email': self.email,
             'action': 'subscribe',
-            'activation_code': self.activation_code
-        })
+            'activation_code': self.activation_code} )
 
-    @permalink
     def unsubscribe_activate_url(self):
-        return ('newsletter_update_activate', (), {
-            'newsletter_slug': self.newsletter.slug,
+            return reverse( 'app_name_newsletter_update_activate', args={
+                'newsletter_slug': self.newsletter.slug,
             'email': self.email,
             'action': 'unsubscribe',
             'activation_code': self.activation_code
-        })
+            } )
 
-    @permalink
     def update_activate_url(self):
-        return ('newsletter_update_activate', (), {
-            'newsletter_slug': self.newsletter.slug,
+            return reverse( 'app_name_newsletter_update_activate', args={
+                'newsletter_slug': self.newsletter.slug,
             'email': self.email,
             'action': 'update',
             'activation_code': self.activation_code
@@ -677,14 +653,12 @@ class Submission(models.Model):
 
         return super(Submission, self).save()
 
-    @permalink
     def get_absolute_url(self):
         assert self.newsletter.slug
         assert self.message.slug
 
-        return (
-            'newsletter_archive_detail', (), {
-                'newsletter_slug': self.newsletter.slug,
+        return reverse( 'app_name_newsletter_archive_detail', args={
+        'newsletter_slug': self.newsletter.slug,
                 'year': self.publish_date.year,
                 'month': self.publish_date.month,
                 'day': self.publish_date.day,
